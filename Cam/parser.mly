@@ -27,7 +27,7 @@ let binary_exp e1 oper e2 = App(PrimOp (primop_of_token oper), Pair(e1, e2))
 %token BLAND BLOR
 %token LPAREN RPAREN LBRACE RBRACE
 %token COMMA SEMICOLON COLON QMARK
-%token IF THEN ELSE WHILE FOR RETURN 
+%token IF THEN ELSE WHILE FOR RETURN
 %token AND ARROW FUN IN LET REC TYPE
 %token EOF
 
@@ -81,6 +81,22 @@ add_exp:
     { binary_exp $1 SUB $3 }
 ;
 
+compare_exp:
+  add_exp
+    { $1 }
+| compare_exp GT mult_exp
+     { binary_exp $1 GT $3 }
+| compare_exp LT mult_exp
+     { binary_exp $1 LT $3 }
+| compare_exp EQ mult_exp
+     { binary_exp $1 EQ $3 }
+| compare_exp GE mult_exp
+     { binary_exp $1 GE $3 }
+| compare_exp LE mult_exp
+     { binary_exp $1 LE $3 }
+| compare_exp NE mult_exp
+     { binary_exp $1 NE $3 }
+;
 
 unary_op:
   FST
