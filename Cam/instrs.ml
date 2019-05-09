@@ -28,34 +28,61 @@ and code = instr list
 type stackelem = Val of value | Cod of code
 
 let rec exec = function
-  (PairV (x,y), (PrimInstr (UnOp Fst))::instructionsList, stack) -> exec (x, instructionsList, stack)
-| (PairV (x,y), (PrimInstr (UnOp Snd))::instructionsList, stack) -> exec (y, instructionsList, stack)
+  (PairV (x,y), (PrimInstr (UnOp Fst))::instructionsList, stack, fds) -> exec (x, instructionsList, stack, fds)
+| (PairV (x,y), (PrimInstr (UnOp Snd))::instructionsList, stack, fds) -> exec (y, instructionsList, stack, fds)
 
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAadd)))::instructionsList, stack) -> exec (IntV (x + y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAsub)))::instructionsList, stack) -> exec (IntV (x - y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAmul)))::instructionsList, stack) -> exec (IntV (x * y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAdiv)))::instructionsList, stack) -> exec (IntV (x / y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAmod)))::instructionsList, stack) -> exec (IntV (x mod y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAadd)))::instructionsList, stack, fds) -> exec (IntV (x + y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAsub)))::instructionsList, stack, fds) -> exec (IntV (x - y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAmul)))::instructionsList, stack, fds) -> exec (IntV (x * y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAdiv)))::instructionsList, stack, fds) -> exec (IntV (x / y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BArith BAmod)))::instructionsList, stack, fds) -> exec (IntV (x mod y), instructionsList, stack)
 
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCeq)))::instructionsList, stack) -> exec (BoolV (x = y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCge)))::instructionsList, stack) -> exec (BoolV (x >= y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCgt)))::instructionsList, stack) -> exec (BoolV (x > y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCle)))::instructionsList, stack) -> exec (BoolV (x <= y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BClt)))::instructionsList, stack) -> exec (BoolV (x < y), instructionsList, stack)
-| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCne)))::instructionsList, stack) -> exec (BoolV (x <> y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCeq)))::instructionsList, stack, fds) -> exec (BoolV (x = y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCge)))::instructionsList, stack, fds) -> exec (BoolV (x >= y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCgt)))::instructionsList, stack, fds) -> exec (BoolV (x > y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCle)))::instructionsList, stack, fds) -> exec (BoolV (x <= y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BClt)))::instructionsList, stack, fds) -> exec (BoolV (x < y), instructionsList, stack)
+| (PairV (IntV (x), IntV (y)), (PrimInstr (BinOp (BCompar BCne)))::instructionsList, stack, fds) -> exec (BoolV (x <> y), instructionsList, stack)
 
-| (x, (Quote v)::instructionsList, stack) -> (v, instructionsList, stack)
-| (x, Cons::instructionsList, (Val y)::stack) -> exec (PairV (x, y), instructionsList, stack)
+| (x, (Quote v)::instructionsList, stack, fds) -> (v, instructionsList, stack, fds)
+| (x, Cons::instructionsList, (Val y)::stack, fds) -> exec (PairV (x, y), instructionsList, stack, fds)
 
-| (x, Push::instructionsList, stack) -> (x, instructionsList, (Val (x))::stack)
-| (x, Swap::instructionsList, (Val y)::stack) -> (y, instructionsList, (Val x)::stack)
+| (x, Push::instructionsList, stack, fds) -> (x, instructionsList, (Val (x))::stack, fds)
+| (x, Swap::instructionsList, (Val y)::stack, fds) -> (y, instructionsList, (Val x)::stack, fds)
 
-| (x, (Cur code)::instructionsList, stack) -> (ClosureV (code, x), instructionsList, stack)
-| (PairV (ClosureV (code, value), arg), App::instructionsList, stack) -> (PairV (value, arg), code, (Cod instructionsList)::stack)
-| (x, Return::instructionsList, (Cod newinstructionsList)::stack) -> (x, newinstructionsList, stack)
+| (x, (Cur code)::instructionsList, stack, fds) -> (ClosureV (code, x), instructionsList, stack, fds)
+| (PairV (ClosureV (code, value), arg), App::instructionsList, stack, fds) -> (PairV (value, arg), code, (Cod instructionsList)::stack, fds)
+| (x, Return::instructionsList, (Cod newinstructionsList)::stack, fds) -> (x, newinstructionsList, stack, fds)
 
-| (BoolV (true), (Branch (t, e))::instructionsList, (Val x)::stack) -> (x, t, (Cod instructionsList)::stack)
-| (BoolV (false), (Branch (t, e))::instructionsList, (Val x)::stack) -> (x, e, (Cod instructionsList)::stack)
+| (BoolV (true), (Branch (t, e))::instructionsList, (Val x)::stack, fds) -> (x, t, (Cod instructionsList)::stack, fds)
+| (BoolV (false), (Branch (t, e))::instructionsList, (Val x)::stack, fds) -> (x, e, (Cod instructionsList)::stack, fds)
 
 | config -> config
+;;
+
+
+let rec access (v : var)  = function
+  x::envt ->
+	if v = x then
+		[PrimInstr (UnOp (Snd))]
+	else
+		(PrimInstr (UnOp (Fst)))::(access v envt)
+| _ -> failwith "La variable n'est pas définie !"
+;;
+
+let rec compile env = function
+  Bool(b) -> [Quote(BoolV(b))]
+| Int(i) -> [Quote(IntV(i))]
+| Var(v) -> (access v env)
+| Pair (e1, e2) -> [Push] @ (compile env e1) @ [Swap] @ (compile env e2) @ [Cons]
+| App (PrimOp (p), e) -> (compile env e) @ [PrimInstr (p)]
+| Fn (v, e) -> [Cur ((compile (v::env) e) @ [Return])]
+| App (f, a) -> [Push] @ (compile env f) @ [Swap] @ (compile env a) @ [Cons; App]
+| Cond (i, t, e) -> [Push] @ (compile env i) @ [Branch ((compile env t) @ [Return], (compile env e) @ [Return])]
+| Fix (_, _) -> failwith "Not implemented."
+| _ -> failwith "Syntaxe invalide !"
+;;
+
+let compile_prog = function
+	Prog (_, t) -> compile [] t
 ;;
