@@ -2,9 +2,9 @@
 
 exception ParseLexError of exn * (string * int * int * string * string)
 
-let parse_file infile = 
+let parse_file infile =
   let lexbuf = Lexing.from_channel (open_in infile) in
-  try 
+  try
     Parser.start Lexer.token lexbuf
   with exn ->
     begin
@@ -18,26 +18,25 @@ let parse_file infile =
 ;;
 
 let print_parse_error (filename, line,cnum,tok,tail) =
-  print_string ("Parsing error in file: " ^ filename ^ 
-                      " on line: " ^ (string_of_int line) ^ 
+  print_string ("Parsing error in file: " ^ filename ^
+                      " on line: " ^ (string_of_int line) ^
                       " column: " ^ (string_of_int cnum) ^
                       " token: "  ^ tok ^
                       "\nrest: "  ^ tail ^ "\n")
 ;;
 
-let parse infile = 
+let parse infile =
   try parse_file infile
-  with ParseLexError (e, r) -> 
+  with ParseLexError (e, r) ->
     print_parse_error r;
     failwith "Stopped execution."
 ;;
 
 
-let generate infile outfile = 
-  (*
+let generate infile outfile =
+
   let outf = open_out outfile in
   let str = Instrs.print_gen_class_to_java (Instrs.compile_prog (parse infile)) in
   output_string outf str ; flush outf;
-  *)
+  
   print_string "finished\n"
-

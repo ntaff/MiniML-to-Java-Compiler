@@ -98,6 +98,20 @@ compare_exp:
      { binary_exp $1 NE $3 }
 ;
 
+and_exp:
+	comp_exp
+	{ $1 }
+| and_exp BLAND and_exp
+	{ Cond($1, $3, Bool(false)) }
+;
+
+or_exp:
+  and_exp
+  { $1 }
+| or_exp BLOR or_exp
+  { Cond($1, Bool(true), $3)}
+;
+
 unary_op:
   FST
   { Fst}

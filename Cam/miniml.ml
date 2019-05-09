@@ -2,14 +2,14 @@ type var = string
 
 (* Unary operators *)
 type unop = Fst | Snd
-    
+
 (* Binary Arithmetic operators *)
 type barith = BAadd | BAsub | BAmul | BAdiv | BAmod
 
 (* Binary Comparison operators *)
 type bcompar = BCeq | BCge | BCgt | BCle | BClt | BCne
 
-type binop = 
+type binop =
   BArith of barith
 | BCompar of bcompar
 
@@ -28,9 +28,8 @@ type mlexp =
 | App of mlexp * mlexp
 | Fn of var * mlexp
 | Fix of (var * mlexp) list * mlexp
-    
+
 type typedef = string
 type prog = Prog of typedef option * mlexp
 
 let mlexp_of_prog (Prog(t, e)) = e
-

@@ -97,3 +97,59 @@ let rec compile env = function
 let compile_prog = function
 	Prog (_, t) -> compile [] t
 ;;
+
+
+(*Convertit une liste d'instruction en chaîne de caractères*)
+let rec print_gen_class_to_java_aux = function
+    (PrimInstr(UnOp(op)))::configs -> "\nLLE.add_elem("^
+                                        (match op with
+                                            Fst -> "new Fst()"
+                                            |Snd -> "new Snd()")^","^(print_gen_class_to_java_aux configs)^")"
+
+    |(PrimInstr(BinOp(BArith(op))))::configs -> "\nLLE.add_elem(new BinOp(BinOp.operateur."^
+                                        (match op with
+                                            BAadd -> "Add"
+                                            |BAsub -> "Sub"
+                                            |BAmul -> "Mult"
+                                            |BAdiv -> "Div"
+                                            |BAmod -> "Mod")^"),"^(print_gen_class_to_java_aux configs)^")"
+
+    |(PrimInstr(BinOp(BCompar(op))))::configs -> "\nLLE.add_elem(new BinOp(BinOp.operateur."^
+                                        (match op with
+                                            BCeq -> "Eq"
+                                            |BCge -> "Ge"
+                                            |BCgt -> "Gt"
+                                            |BCle -> "Le"
+                                            |BClt -> "Lt"
+                                            |BCne -> "Ne")^"),"^(print_gen_class_to_java_aux configs)^")"
+
+    | Cons::configs -> "\nLLE.add_elem(new Cons(),"^(print_gen_class_to_java_aux configs)^")"
+    | Push::configs -> "\nLLE.add_elem(new Push(),"^(print_gen_class_to_java_aux configs)^")"
+    | App::configs -> "\nLLE.add_elem(new App(),"^(print_gen_class_to_java_aux configs)^")"
+    | Return::configs -> "\nLLE.add_elem(new Return(),"^(print_gen_class_to_java_aux configs)^")"
+    | Swap::configs -> "\nLLE.add_elem(new Swap(),"^(print_gen_class_to_java_aux configs)^")"
+    | (Quote v)::configs -> "\nLLE.add_elem(new Quote("^(print_values v)^"),"^(print_gen_class_to_java_aux configs)^")"
+    | (Cur c)::configs -> "\nLLE.add_elem(new Cur("^(print_gen_class_to_java_aux c)^"),"^(print_gen_class_to_java_aux configs)^")"
+    | (Branch(c1,c2))::configs -> "\nLLE.add_elem(new Branch("^(print_gen_class_to_java_aux c1)^","^(print_gen_class_to_java_aux c2)^"),"^(print_gen_class_to_java_aux configs)^")"
+    | (Call v)::configs -> "\nLLE.add_elem(new Call(\""^v^"\"),"^(print_gen_class_to_java_aux configs)^")"
+    | (AddDefs(defs))::configs -> "\nLLE.add_elem(new AddDefs("^(print_defs defs)^"),"^(print_gen_class_to_java_aux configs)^")"
+    | (RmDefs(n))::configs -> "\nLLE.add_elem(new RmDefs("^(string_of_int n)^"), "^(print_gen_class_to_java_aux configs)^")"
+    | [] -> "LLE.empty()"
+(*Convertit les valeurs en chaînes de caractères*)
+and print_values = function
+    NullV -> "new NullV()"
+    | (IntV v) -> "new IntV("^(string_of_int v)^")"
+    | (BoolV b) -> "new BoolV("^(string_of_bool b)^")"
+    | (PairV(x,y)) -> "new PairV("^(print_values x)^","^(print_values y)^")"
+    | (ClosureV(c,v)) -> "new ClosureV("^(print_gen_class_to_java_aux c)^","^(print_values v)^")"
+and print_defs = function
+    (v,c)::defs -> "LLE.add_elem(new Pair(\""^v^"\","^(print_gen_class_to_java_aux c)^"), "^(print_defs defs)^")"
+| [] -> "LLE.empty()";;
+
+let print_gen_class_to_java = function
+    cfg -> "import java.util.*;"^"\n\n"
+            ^"public class Gen {"^"\n"
+            ^"public static LinkedList<Instr> code ="
+            ^(print_gen_class_to_java_aux cfg)^";\n"
+            ^"}"
+;;
