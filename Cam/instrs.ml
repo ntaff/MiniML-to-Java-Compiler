@@ -27,6 +27,13 @@ and code = instr list
 
 type stackelem = Val of value | Cod of code
 
+let rec chop n l =
+	if n = 0 then
+		l
+	else
+		chop (n - 1) (List.tl l)
+;;
+
 let rec exec = function
   (PairV (x,y), (PrimInstr (UnOp Fst))::instructionsList, stack, fds) -> exec (x, instructionsList, stack, fds)
 | (PairV (x,y), (PrimInstr (UnOp Snd))::instructionsList, stack, fds) -> exec (y, instructionsList, stack, fds)
@@ -57,6 +64,10 @@ let rec exec = function
 | (BoolV (true), (Branch (t, e))::instructionsList, (Val x)::stack, fds) -> (x, t, (Cod instructionsList)::stack, fds)
 | (BoolV (false), (Branch (t, e))::instructionsList, (Val x)::stack, fds) -> (x, e, (Cod instructionsList)::stack, fds)
 
+| (x, (Call (f))::instructionsList, stack, fds) -> (x, (List.assoc f fds)@instructionsList, stack, fds)
+| (x, (AddDefs (defs))::instructionsList, stack, fds) -> (x, instructionsList, stack, defs@fds)
+| (x, (RmDefs(n))::instructionsList, stack, fds) -> (x, instructionsList, stack, chop n fds)
+
 | config -> config
 ;;
 
@@ -67,7 +78,7 @@ let rec access (v : var)  = function
 		[PrimInstr (UnOp (Snd))]
 	else
 		(PrimInstr (UnOp (Fst)))::(access v envt)
-| _ -> failwith "La variable n'est pas définie !"
+| _ -> failwith "Undefinited variable"
 ;;
 
 let rec compile env = function
@@ -80,7 +91,7 @@ let rec compile env = function
 | App (f, a) -> [Push] @ (compile env f) @ [Swap] @ (compile env a) @ [Cons; App]
 | Cond (i, t, e) -> [Push] @ (compile env i) @ [Branch ((compile env t) @ [Return], (compile env e) @ [Return])]
 | Fix (_, _) -> failwith "Not implemented."
-| _ -> failwith "Syntaxe invalide !"
+| _ -> failwith "Syntax error"
 ;;
 
 let compile_prog = function
