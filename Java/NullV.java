@@ -4,6 +4,6 @@ class NullV extends Value {
     public NullV () {
     }
     void print_value() {
-        System.out.print("Null");
+        System.out.print("NULL");
     }
 }
