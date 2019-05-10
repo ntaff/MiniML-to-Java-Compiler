@@ -99,7 +99,7 @@ compare_exp:
 ;
 
 and_exp:
-	comp_exp
+	compare_exp
 	{ $1 }
 | and_exp BLAND and_exp
 	{ Cond($1, $3, Bool(false)) }
