@@ -31,8 +31,7 @@ let rec chop n l =
 	if n = 0 then
 		l
 	else
-		chop (n - 1) (List.tl l)
-;;
+		chop (n - 1) (List.tl l);;
 
 let rec exec = function
   (PairV (x,y), (PrimInstr (UnOp Fst))::instructionsList, stack, fds) -> exec (x, instructionsList, stack, fds)
@@ -68,8 +67,7 @@ let rec exec = function
 | (x, (AddDefs (defs))::instructionsList, stack, fds) -> (x, instructionsList, stack, defs@fds)
 | (x, (RmDefs(n))::instructionsList, stack, fds) -> (x, instructionsList, stack, chop n fds)
 
-| config -> config
-;;
+| config -> config;;
 
 
 let rec access (v : var)  = function
@@ -78,8 +76,7 @@ let rec access (v : var)  = function
 		[PrimInstr (UnOp (Snd))]
 	else
 		(PrimInstr (UnOp (Fst)))::(access v envt)
-| _ -> failwith "Undefinited variable"
-;;
+| _ -> failwith "Undefinited variable";;
 
 let rec compile env = function
   Bool(b) -> [Quote(BoolV(b))]
@@ -87,16 +84,14 @@ let rec compile env = function
 | Var(v) -> (access v env)
 | Pair (e1, e2) -> [Push] @ (compile env e1) @ [Swap] @ (compile env e2) @ [Cons]
 | App (PrimOp (p), e) -> (compile env e) @ [PrimInstr (p)]
-| Fn (v, e) -> [Cur ((compile (v::env) e) @ [Return])]
 | App (f, a) -> [Push] @ (compile env f) @ [Swap] @ (compile env a) @ [Cons; App]
+| Fn (v, e) -> [Cur ((compile (v::env) e) @ [Return])]
 | Cond (i, t, e) -> [Push] @ (compile env i) @ [Branch ((compile env t) @ [Return], (compile env e) @ [Return])]
 | Fix (_, _) -> failwith "Not implemented."
-| _ -> failwith "Syntax error"
-;;
+| _ -> failwith "Syntax error";;
 
 let compile_prog = function
-	Prog (_, t) -> compile [] t
-;;
+	Prog (_, t) -> compile [] t;;
 
 
 (*Convertit une liste d'instruction en chaîne de caractères*)
@@ -151,5 +146,4 @@ let print_gen_class_to_java = function
             ^"public class Gen {"^"\n"
             ^"public static LinkedList<Instr> code ="
             ^(print_gen_class_to_java_aux cfg)^";\n"
-            ^"}"
-;;
+            ^"}";;
