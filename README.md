@@ -28,7 +28,7 @@ Tests dans l'interpreteur Caml :
 
 `#use "use.ml";;`
 
-- Pour tester la fonction ackermann "ackermann_iter.ml":
+- Pour tester la fonction ackermann "ackermann_iter.ml" :
 
 `exec (NullV, (compile_prog (parse "Tests/ackermann_iter.ml")), [], []);;`
 (Erreur de parsing retournée lors de l'execution de ce test)
