@@ -1,56 +1,63 @@
 import java.util.*;
 
-class Config extends Object {
-    Value v;
-    LinkedList<Instr> c;
-    LinkedList<StackElem> s;
+public class Config {
+	private Value val;
+	private List<Instr> code;
+	private List<StackElem> stack;
 
-    Value get_value() {
-        return v;
-    }
-    LinkedList<Instr> get_code() {
-        return c;
-    }
-    LinkedList<StackElem> get_stack() {
-        return s;
-    }
-
-    void set_value(Value nv) {
-        v = nv;
-    }
-    void set_code(LinkedList<Instr> nc) {
-        c = nc;
-    }
-    void get_stack(LinkedList<StackElem> ns) {
-        s = ns;
-    }
-
-    /* Constructors */
-    public Config (Value vl, LinkedList<Instr> cd, LinkedList<StackElem> se) {
-        v = vl;
-        c = cd;
-        s = se;
-    }
-
-
-    // one-step execution 
-    boolean exec_step() {
-        if(c.isEmpty() == true) return false;
-        else {
-	c.getFirst().exec_instr(this);
-	return true;
+	public Config (Value val, List<Instr> code, List<StackElem> stack) {
+		this.val = val;
+		this.code = code;
+		this.stack = stack;
 	}
-    }
 
-    // run to completion
-    void exec() {
-        while(exec_step()){}
-    }
+	public Value getValue() {
+		return val;
+	}
 
-    // run for n steps
-    void step(int n) {
-        // to be implemented
-    }
-    
+	public void setValue(Value val) {
+		this.value = val;
+	}
+
+	List<Instr> getCode() {
+		return code;
+	}
+
+	public void setCode(List<Instr> code) {
+		this.code = code;
+	}
+
+	List<StackElem> getStack() {
+		return stack;
+	}
+
+	public void setStack(List<StackElem> stack) {
+		this.stack = stack;
+	}
+
+	public void nextInstruction() {
+		code.remove(0);
+	}
+
+	// one-step execution
+	public boolean exec_step() {
+    if (code.isEmpty()){
+         return false;
+     }
+     else{
+         code.get(0).exec_instr(this);
+         return true;
+}
+	}
+
+	// run to completion
+	public void exec() {
+    while (exec_step()){}
 }
 
+// run for n steps
+void step(int n) {
+for(int i=0; i<n && exec_step(); n++){}
+}
+	}
+}
